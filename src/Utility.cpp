@@ -25,7 +25,7 @@ namespace tricrf {
 
 /** Tokenizer.
 	@param	str	a string to be tokenized
-	@param	delimiters	delimeter(s) 
+	@param	delimiters	delimeter(s)
 	@return	a string vector
 */
 vector<string> tokenize(const string& str, const string& delimiters) {
@@ -38,7 +38,7 @@ vector<string> tokenize(const string& str, const string& delimiters) {
         pos = str.find_first_of(delimiters, lastPos);
     }
 	return tokens;
-} 
+}
 
 /** Logger.
 */
@@ -51,7 +51,7 @@ Logger::Logger(const string& filename, size_t level) {
 	if (filename == "")
 		m_File = stderr;
 	else {
-		if (!(m_File = fopen(filename.c_str(), "a+"))) 
+		if (!(m_File = fopen(filename.c_str(), "a+")))
 			throw runtime_error("cannot open data file");
 	}
 
@@ -84,7 +84,7 @@ int Logger::report(const char *fmt, ...) {
 	if (m_Level > 2) {
 		fprintf(m_File, "[%s] ", getTime().c_str());
 	}
-	
+
 	/// write the message
 	if (m_Level > 0) {
 		va_list argptr;
@@ -108,7 +108,7 @@ int Logger::report(size_t level, const char *fmt, ...) {
 	if (level > 2) {
 		fprintf(m_File, "[%s] ", getTime().c_str());
 	}
-	
+
 	/// write the message
 	if (level > 0) {
 		va_list argptr;
@@ -141,7 +141,7 @@ bool Configurator::parse(const string& filename) {
 
 	/// Initializing
 	config.clear();
-	
+
 	/// reading the text
 	while (getline(f, line)) {
 		if (!line.empty() && line[0] != '#') {
@@ -164,7 +164,7 @@ bool Configurator::parse(const string& filename) {
 			config.insert(make_pair(tokens[0], values));
 		}
 	}
-		
+
 	m_filename = filename;
 	return true;
 }
