@@ -33,7 +33,7 @@ Parameter::Parameter() {
 */
 Parameter::~Parameter() {
 	/// memory free
-	//if (m_Weight) 
+	//if (m_Weight)
 	//	delete[] m_Weight;
 	//if (m_Gradient)
 	//	delete[] m_Gradient;
@@ -91,8 +91,8 @@ void Parameter::initializeGradient2() {
 /** Get weight vector pointer.
 	@warning	The size of weight vector should be larger than 1.
 */
-double* Parameter::getWeight() { 
-	return &m_Weight[0]; 
+double* Parameter::getWeight() {
+	return &m_Weight[0];
 }
 
 void Parameter::setWeight(double* theta) {
@@ -105,14 +105,14 @@ void Parameter::setWeight(double* theta) {
 	@warning	The size of gradient vector should be larger than 1.
 */
 double* Parameter::getGradient() {
-	return &m_Gradient[0]; 
+	return &m_Gradient[0];
 }
 
 /** Make and return the observation index
 	@todo	If the index vector is stored in training set, then the training speed can be (slightly) improved.
 */
 vector<ObsParam> Parameter::makeObsIndex(vector<pair<size_t, double> >& obs) {
-	vector<ObsParam> obs_param; 
+	vector<ObsParam> obs_param;
 	vector<pair<size_t, double> >::iterator iter = obs.begin();
 	for (; iter != obs.end(); iter++) {
 		vector<pair<size_t, size_t> >& param = m_ParamIndex[iter->first];
@@ -127,15 +127,15 @@ vector<ObsParam> Parameter::makeObsIndex(vector<pair<size_t, double> >& obs) {
 	return obs_param;
 }
 
-// sparse-FB, 2007-11-08 
+// sparse-FB, 2007-11-08
 vector<ObsParam> Parameter::makeObsIndex(vector<pair<size_t, double> >& obs, map<size_t, size_t>& beam) {
-	vector<ObsParam> obs_param; 
+	vector<ObsParam> obs_param;
 	vector<pair<size_t, double> >::iterator iter = obs.begin();
 	for (; iter != obs.end(); iter++) {
 		vector<pair<size_t, size_t> >& param = m_ParamIndex[iter->first];
 		size_t index = 0;
 		for (size_t i = 0; i < param.size(); ++i) {
-			if (beam.find(param[i].first) == beam.end()) 
+			if (beam.find(param[i].first) == beam.end())
 				continue;
 			ObsParam element;
 			element.y = param[i].first;
@@ -149,7 +149,7 @@ vector<ObsParam> Parameter::makeObsIndex(vector<pair<size_t, double> >& obs, map
 
 vector<ObsParam> Parameter::makeObsIndex(vector<pair<string, double> >& obs) {
 	int pid;
-	vector<ObsParam> obs_param; 
+	vector<ObsParam> obs_param;
 	vector<pair<string, double> >::iterator iter = obs.begin();
 	for (; iter != obs.end(); iter++) {
 		if ((pid = findObs(iter->first)) >= 0) {
@@ -168,28 +168,28 @@ vector<ObsParam> Parameter::makeObsIndex(vector<pair<string, double> >& obs) {
 
 /**	Return the size of feature vector.
 */
-size_t Parameter::sizeFeatureVec() { 
-	return m_FeatureVec.size(); 
+size_t Parameter::sizeFeatureVec() {
+	return m_FeatureVec.size();
 }
 
 /**	Return the size of state vector.
 */
-size_t Parameter::sizeStateVec() { 
-	return m_StateVec.size(); 
+size_t Parameter::sizeStateVec() {
+	return m_StateVec.size();
 }
 
 /**	Return the state map and vector.
 */
-std::pair<Map, Vec> Parameter::getState() { 
-	return make_pair(m_StateMap, m_StateVec); 
+std::pair<Map, Vec> Parameter::getState() {
+	return make_pair(m_StateMap, m_StateVec);
 }
 
 /**	Return the size of feature vector.
 */
-//int Parameter::findState(size_t key) { 
+//int Parameter::findState(size_t key) {
 //	if (key < m_StateID.size())
-//		return m_StateID[key]; 
-//	else 
+//		return m_StateID[key];
+//	else
 //		return -1;
 //}
 
@@ -264,7 +264,7 @@ size_t Parameter::updateParam(size_t oid, size_t pid, double fval) {
 		m_Gradient.push_back(0.0);
 		param.push_back(make_pair(oid, fid));
 		m_ParamIndex.push_back(param);
-	} else {	 /// A parameter vector is exist 
+	} else {	 /// A parameter vector is exist
 		vector<pair<size_t, size_t> >& param = m_ParamIndex[pid];
 		size_t i;
 		for (i = 0; i < param.size(); i++) {
@@ -309,7 +309,7 @@ size_t Parameter::getDefaultState() {
 /**
 */
 void Parameter::makeStateIndex(bool makeIndex) {
-	
+
 	/// Make state pid
     //m_StateID.clear();
 	/*
@@ -333,7 +333,7 @@ void Parameter::makeStateIndex(bool makeIndex) {
 	m_StateIndex.clear();
 	for (size_t y1=0; y1 < sizeStateVec(); y1++) {
 		//int pid = findState(y1);
-		//if (pid < 0) 
+		//if (pid < 0)
 		//	continue;
 		string fi = mEDGE + m_StateVec[y1];
 		if (m_FeatureMap.find(fi) != m_FeatureMap.end()) {
@@ -346,7 +346,7 @@ void Parameter::makeStateIndex(bool makeIndex) {
 				element.fid = param[i].second;
 				element.fval = 1.0;
 				m_StateIndex.push_back(element);
-				
+
 				if (makeIndex) {
 					// make back pointer (t, t-1)
 					vector<size_t> &backpointer = m_SelectedStateList1[element.y2];
@@ -362,7 +362,7 @@ void Parameter::makeStateIndex(bool makeIndex) {
 }
 
 void Parameter::makeActiveIndex(double eta) {
-	
+
 	m_SelectedStateList1.clear();
 	m_SelectedStateList2.clear();
 	m_SelectedStateList1.resize(sizeStateVec());
@@ -381,7 +381,7 @@ void Parameter::makeActiveIndex(double eta) {
 }
 
 vector<StateParam> Parameter::makeStateIndex(size_t y1) {
-	vector<StateParam> state_param; 
+	vector<StateParam> state_param;
 	string fi = mEDGE + m_StateVec[y1];
 	if (m_FeatureMap.find(fi) != m_FeatureMap.end()) {
 		size_t pid = m_FeatureMap[fi];
@@ -401,7 +401,7 @@ vector<StateParam> Parameter::makeStateIndex(size_t y1) {
 /** Make the index for Tied Potential
 */
 void Parameter::makeTiedPotential(double K) {
-	
+
 	/// Make state index
 	m_SelectedStateIndex.clear();
 	m_RemainStateIndex.clear();
@@ -415,7 +415,7 @@ void Parameter::makeTiedPotential(double K) {
 		remain_size.push_back(0.0);
 		remain_count.push_back(0.0);
 	}
-	
+
 	// redefinition for tied potential (redundant)
 	m_SelectedStateList1.clear();
 	m_SelectedStateList2.clear();
@@ -466,7 +466,7 @@ void Parameter::makeTiedPotential(double K) {
 		m_Count[iter->fid] = remain_count[iter->y2] / remain_size[iter->y2];
 	}
 	*/
-	
+
 	for (size_t i = 0; i < sizeStateVec(); i++) {
 		if (remain_size[i] > 0)
 			m_Count[remain_fid[i]] /= remain_size[i];
@@ -476,11 +476,11 @@ void Parameter::makeTiedPotential(double K) {
 }
 
 /** Save the model.
-	@param	f	output file stream 
+	@param	f	output file stream
 	@return	success or failure
 */
 bool Parameter::save(ofstream& f) {
-	/// Errors	
+	/// Errors
 	if (m_ParamIndex.size() != m_FeatureVec.size())
 		return false;
 
@@ -488,12 +488,12 @@ bool Parameter::save(ofstream& f) {
 	f << "// State ; " << m_StateVec.size() << endl;
     for (size_t i = 0; i < m_StateVec.size(); ++i)
         f << m_StateVec[i] << endl;
-	
-	/// feature 
+
+	/// feature
     f << "// Feature ; " << m_FeatureVec.size() << endl;
     for (size_t i = 0; i < m_FeatureVec.size(); ++i)
         f << m_FeatureVec[i] << endl;
-	
+
 	/// parameter index
     f << "// Parameter ; " << m_ParamIndex.size() << endl;
     for (size_t i = 0; i < m_ParamIndex.size(); ++i) {
@@ -507,7 +507,7 @@ bool Parameter::save(ofstream& f) {
     /// write the weight vector
     f   << "// Weight ; " << n_weight << endl;
     for (size_t i = 0; i < n_weight; ++i) {
-        f << m_Weight[i] << endl;	
+        f << m_Weight[i] << endl;
 	}
 
 	return true;
@@ -564,7 +564,7 @@ bool Parameter::load(ifstream& f) {
         getline(f, line);
         size_t oid;
         tok = tokenize(line);
-		vector<string>::iterator it = tok.begin();	
+		vector<string>::iterator it = tok.begin();
         ++it; ///< skip count which is only used in binary format
         for (; it != tok.end();) {
             oid = atoi(it->c_str()); ++it;
@@ -591,7 +591,7 @@ bool Parameter::load(ifstream& f) {
 	/// setting
 	m_Count.resize(n_weight);
 	fill(m_Count.begin(), m_Count.end(), 0.0);
-	
+
 	return true;
 }
 

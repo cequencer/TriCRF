@@ -50,20 +50,20 @@ protected:
 	std::vector<double> m_Weight;
 	std::vector<double> m_Gradient;
 	std::vector<double> m_Count;
-	
+
 	/// Dictionary
 	Map m_FeatureMap;
 	Vec m_FeatureVec;
 	Map m_StateMap;
 	Vec m_StateVec;
-	
+
 
 	/// Options
 	std::string mEDGE;
 	size_t m_default_oid;
 
 public:
-	/// 
+	///
 	//std::vector<size_t> m_StateID;
 
 	Parameter();
@@ -76,10 +76,10 @@ public:
 	void initialize();
 	void initializeGradient();
 	void initializeGradient2();
-	size_t size(); 
+	size_t size();
 	void clear(bool state = false);
 
-	/// Parameters 
+	/// Parameters
 	double* getWeight();
 	double* getGradient();
 	void setWeight(double* theta);
@@ -96,7 +96,7 @@ public:
 	size_t sizeFeatureVec();
 	size_t sizeStateVec();
 	std::pair<Map, Vec> getState();
-	//int findState(size_t key); 
+	//int findState(size_t key);
 
 	/// Update and test the parameters
 	size_t addNewState(const std::string& key);

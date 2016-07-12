@@ -56,17 +56,17 @@ private:
 	double micro_f1;			/// micro averaged F1 score
 	double micro_prec;		/// micro averaged precision
 	double micro_rec;		/// micro averaged recall
-	size_t nTruePhrase_, nGuessPhrase_, nCorrectPhrase_;	
-	
+	size_t nTruePhrase_, nGuessPhrase_, nCorrectPhrase_;
+
 	/// private methods
 	std::vector<std::pair<size_t, std::pair<size_t, size_t> > > chunk(std::vector<size_t> seq);
 
 public:
-		
+
 	/// basic methods
 	Evaluator();
 	Evaluator(Parameter& param, bool bio = true);
-	void initialize();	
+	void initialize();
 
 	/// encoding and calculating
 	void encode(Parameter& param, bool bio = true);
@@ -86,7 +86,7 @@ public:
 	double getAccuracy();
 	std::vector<double> getMacroF1();
 	std::vector<double> getMicroF1();
-	void Print(Logger *logger);	
+	void Print(Logger *logger);
 
 };
 

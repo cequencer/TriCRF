@@ -49,8 +49,8 @@ void Evaluator::initialize() {
 	loglikelihood = 0.0;
 	nGuessPhrase_ = 0;
 	nCorrectPhrase_ = 0;
-	nTruePhrase_ = 0;	
-	
+	nTruePhrase_ = 0;
+
 	/// F1 score
 	if (n_class > 0) {
 		true_class.resize(n_class, 0);
@@ -79,9 +79,9 @@ void Evaluator::encode(Parameter& param, bool bio) {
 		class_vec = m_StateVec;
 		for (size_t i = 0; i < class_vec.size(); ++i) {
 			bio_index.push_back(i);
-			is_begin.insert(make_pair(i, 1));		
+			is_begin.insert(make_pair(i, 1));
 		}
-		
+
 		is_bio_encoding = false;
 	} else {	 /// use BIO encoding scheme
 		vector<string>::iterator it = m_StateVec.begin();
@@ -92,22 +92,22 @@ void Evaluator::encode(Parameter& param, bool bio) {
 					class_map.insert(make_pair(tok[1], class_vec.size()));
 					bio_index.push_back(class_vec.size());
 					class_vec.push_back(tok[1]);
-				} else 
-					bio_index.push_back(class_map[tok[1]]); 
+				} else
+					bio_index.push_back(class_map[tok[1]]);
 				if (tok[0] == "B")
 					is_begin.insert(make_pair(m_StateMap[*it], 1));
 			} else {
 				class_map.insert(make_pair(*it, class_vec.size()));
 				bio_index.push_back(class_vec.size());
 				class_vec.push_back(*it);
-				is_begin.insert(make_pair(m_StateMap[*it], 1));				
+				is_begin.insert(make_pair(m_StateMap[*it], 1));
 			}
 		} // for
 		is_bio_encoding = true;
 	}	// if else
-	
+
 	assert(bio_index.size() == m_StateVec.size());
-	
+
 	outside_class = m_StateMap["O"];
 
 	/** Out of class */
@@ -125,15 +125,15 @@ vector<pair<size_t, pair<size_t, size_t> > > Evaluator::chunk(vector<size_t> seq
 
 	size_t label, spos, epos;
 	bool isinphrase = false, isempty = true;
-	
+
 	for (size_t i = 0; i < seq.size(); i++) {
 		if (seq[i] == outside_class) {	/// outside class
-			if (!isempty) 
+			if (!isempty)
 				phrase.push_back(make_pair(label, make_pair(spos, epos)));
 			isempty = true;
 			isinphrase = false;
 		} else if (is_begin.find(seq[i]) != is_begin.end()) {	/// B-X class
-			if (!isempty) 
+			if (!isempty)
 				phrase.push_back(make_pair(label, make_pair(spos, epos)));
 			label = bio_index[seq[i]];
 			spos = i; epos = i;
@@ -142,9 +142,9 @@ vector<pair<size_t, pair<size_t, size_t> > > Evaluator::chunk(vector<size_t> seq
 		} else if (isinphrase) {	/// I-X class
 			size_t label2 = 10000;
 			if (bio_index.size() < seq[i])
-				label2 = bio_index[seq[i]];		
+				label2 = bio_index[seq[i]];
 			if (label != label2) {	 /// but ...
-				if (!isempty) 
+				if (!isempty)
 					phrase.push_back(make_pair(label, make_pair(spos, epos)));
 				if (bio_index.size() < seq[i])
 					label = bio_index[seq[i]];
@@ -152,10 +152,10 @@ vector<pair<size_t, pair<size_t, size_t> > > Evaluator::chunk(vector<size_t> seq
 					label = OUT_OF_CLASS;
 				spos = i; epos = i;
 				isempty = false;
-			} else 
+			} else
 				epos = i;
 		} else {
-			if (!isempty) 
+			if (!isempty)
 				phrase.push_back(make_pair(label, make_pair(spos, epos)));
 			if (bio_index.size() < seq[i])
 				label = bio_index[seq[i]];
@@ -178,11 +178,11 @@ size_t Evaluator::append(Parameter& param, vector<string> ref, vector<string> hy
 	vector<string> m_StateVec = param.getState().second;
 
 	for (size_t i = 0; i < ref.size(); i++) {
-		if (m_StateMap.find(ref[i]) != m_StateMap.end()) 
+		if (m_StateMap.find(ref[i]) != m_StateMap.end())
 			ref_d.push_back(m_StateMap[ref[i]]);
 		else
 			ref_d.push_back(m_StateVec.size());
-		if (m_StateMap.find(hyp[i]) != m_StateMap.end()) 
+		if (m_StateMap.find(hyp[i]) != m_StateMap.end())
 			hyp_d.push_back(m_StateMap[hyp[i]]);
 		else
 			hyp_d.push_back(m_StateVec.size());
@@ -197,12 +197,12 @@ size_t Evaluator::append(vector<size_t> ref, vector<size_t> hyp) {
 
 	// accuracy
 	for (size_t i = 0; i < ref.size(); i++) {
-		if (ref[i] == hyp[i]) 
+		if (ref[i] == hyp[i])
 			n_correct ++;
 		n_event ++;
 	}
 	n_sequence ++;
-	
+
 	/// f1-score
 	size_t g_index, t_index;
 	if (is_bio_encoding) { /// bio enconding
@@ -213,24 +213,24 @@ size_t Evaluator::append(vector<size_t> ref, vector<size_t> hyp) {
 		vector<pair<size_t, pair<size_t, size_t> > >::iterator rit = ref_class.begin();
 		for (; rit != ref_class.end(); ++rit ) {
 			true_class[rit->first] ++;
-			nTruePhrase_ ++;			
+			nTruePhrase_ ++;
 		}
 		/// for hypothesis
 		vector<pair<size_t, pair<size_t, size_t> > >::iterator hit = hyp_class.begin();
 		for (; hit != hyp_class.end(); ++hit ) {
 			guess_class[hit->first] ++;
-			nGuessPhrase_ ++;			
+			nGuessPhrase_ ++;
 		}
-		/// correct 
+		/// correct
 		rit = ref_class.begin();
 		hit = hyp_class.begin();
 		for (; rit != ref_class.end() && hit != hyp_class.end(); ) {
 			g_index = hit->first;
 			t_index = rit->first;
 			if (rit->second.first == hit->second.first && rit->second.second == hit->second.second) {
-				if (g_index == t_index) { 
+				if (g_index == t_index) {
 					correct_class[t_index] ++;
-					nCorrectPhrase_ ++;					
+					nCorrectPhrase_ ++;
 				}
 				++rit; ++hit;
 			} else if (rit->second.second < hit->second.first) {
@@ -239,7 +239,7 @@ size_t Evaluator::append(vector<size_t> ref, vector<size_t> hyp) {
 				++hit;
 			} else {
 				++rit; ++hit;
-			}		
+			}
 		}
 	} else { ///< no bio encoding
 		for (size_t i = 0; i < ref.size(); i++) {
@@ -248,15 +248,15 @@ size_t Evaluator::append(vector<size_t> ref, vector<size_t> hyp) {
 			guess_class[g_index] ++;
 			true_class[t_index] ++;
 			nGuessPhrase_ ++;
-			nTruePhrase_ ++;							
-						
+			nTruePhrase_ ++;
+
 			if (g_index == t_index) {
 				correct_class[t_index] ++;
-				nCorrectPhrase_ ++;					
+				nCorrectPhrase_ ++;
 			}
 		}
 	}
-	
+
 	return n_sequence;
 }
 
@@ -272,11 +272,11 @@ void Evaluator::calculateF1() {
 	macro_rec = 0.0;
 	macro_f1 = 0.0;
 	for (size_t i = 0; i < class_vec.size(); i++) {
-		//if (class_vec[i] == "O" || i == OUT_OF_CLASS) 
+		//if (class_vec[i] == "O" || i == OUT_OF_CLASS)
 		//	continue;
 		if (guess_class[i] == 0 || correct_class[i] == 0)
 			per_class_prec[i] = 0.0;
-		else 
+		else
 			per_class_prec[i] = (double)correct_class[i] * 100.0 / guess_class[i];
 		if (true_class[i] == 0 || correct_class[i] == 0)
 			per_class_rec[i] = 0.0;
@@ -294,7 +294,7 @@ void Evaluator::calculateF1() {
 	macro_rec = accumulate(per_class_rec.begin(), per_class_rec.end(), 0.0) / n_class;
 	if ((macro_prec + macro_rec) != 0.0)
 		macro_f1 = 2.0 * (macro_prec * macro_rec) / (macro_prec + macro_rec);
-	
+
 	micro_prec /= num_data;
 	micro_rec /= num_data;
 	/*if (nGuessPhrase_ > 0)
@@ -394,11 +394,11 @@ size_t Evaluator::sizeClass() {
 }
 
 void Evaluator::Print(Logger *logger) {
-	logger->report("Accuracy: %6.2f%%: prec: %6.2f%%; rec: %6.2f%%; F1: %6.2f\n", 
+	logger->report("Accuracy: %6.2f%%: prec: %6.2f%%; rec: %6.2f%%; F1: %6.2f\n",
 		getAccuracy(), micro_prec, micro_rec, micro_f1);
 	for (size_t i = 0; i < n_class; i++) {
 		if (class_vec[i] != "O" && class_vec[i] != "!OUT_OF_CLASS!")
-			logger->report("%17s: prec: %6.2f%%; rec: %6.2f%%; F1: %6.2f\n", 
+			logger->report("%17s: prec: %6.2f%%; rec: %6.2f%%; F1: %6.2f\n",
 				class_vec[i].c_str(), per_class_prec[i], per_class_rec[i], per_class_f1[i]);
 	}
 }

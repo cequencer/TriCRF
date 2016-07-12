@@ -65,8 +65,8 @@ public:
 //  See http://www.boost.org/libs/timer for documentation.
 class timer {
  public:
-	timer() { _start_time = std::clock(); } 
-	void   restart() { _start_time = std::clock(); } 
+	timer() { _start_time = std::clock(); }
+	void   restart() { _start_time = std::clock(); }
 	double elapsed() const { return  double(std::clock() - _start_time) / CLOCKS_PER_SEC; }
 	double elapsed_max() const { return (double(std::numeric_limits<std::clock_t>::max())	- double(_start_time)) / double(CLOCKS_PER_SEC); 	}
 	double elapsed_min() const  { return double(1)/double(CLOCKS_PER_SEC); }

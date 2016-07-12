@@ -28,7 +28,7 @@ all: $(target)
 
 tricrf: Main.o TriCRF1.o TriCRF2.o TriCRF3.o CRF.o MaxEnt.o Evaluator.o Param.o Data.o LBFGS.o Utility.o
 	$(CC) -o $@ Main.o TriCRF1.o TriCRF2.o TriCRF3.o CRF.o MaxEnt.o Evaluator.o Param.o Data.o LBFGS.o Utility.o $(CFLAGS) $(LIBS)
-	
+
 clean:
-	rm $(target) *.o 
+	rm $(target) *.o
 

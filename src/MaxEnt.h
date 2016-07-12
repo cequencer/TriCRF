@@ -32,9 +32,9 @@ protected:
 	/// Parameter vector
 	Parameter m_Param;
 
-	/// Logger 
+	/// Logger
 	Logger *logger;
-	
+
 	/// Inference
 	virtual std::vector<double> evaluate(Event ev, size_t& max_outcome);
 
@@ -48,9 +48,9 @@ protected:
 
 
 public:
-	MaxEnt();	 
+	MaxEnt();
 	MaxEnt(Logger *logger);
-	~MaxEnt();	
+	~MaxEnt();
 
 	/// Data manipulation
 	Event packEvent(std::vector<std::string>& tokens, Parameter* p_Param = NULL, bool test = false);
@@ -58,8 +58,8 @@ public:
 	StringEvent packStringEvent(std::vector<std::string>& tokens, Parameter* p_Param = NULL, bool test = false);
 	virtual void readTrainData(const std::string& filename);
 	virtual void readDevData(const std::string& filename);
-	
-	/// Model 
+
+	/// Model
 	virtual bool loadModel(const std::string& filename);
 	virtual bool saveModel(const std::string& filename);
 	virtual bool averageParam() {};
@@ -67,16 +67,16 @@ public:
 	/// Testing
 	virtual bool test(const std::string& filename, const std::string& outputfile = "", bool confidence = false);
 
-	/// Training 
+	/// Training
 	virtual void clear();
 	virtual void initializeModel();
 	virtual bool pretrain(size_t max_iter = 100, double sigma = 20, bool L1 = false);
 	virtual bool train(size_t max_iter = 100, double sigma = 20, bool L1 = false);
 
-	/// Logger 
+	/// Logger
 	void setLogger(Logger *logger);
 	void setPrune(double prune);
-	
+
 	Parameter& getParam() { return m_Param; };
 };
 
