@@ -97,7 +97,7 @@ void Evaluator::encode(Parameter& param, bool bio) {
 				if (tok[0] == "B")
 					is_begin.insert(make_pair(m_StateMap[*it], 1));
 			} else {
-				std::cout << "insert: " << *it << std::endl;
+				// std::cout << "insert: " << *it << std::endl;
 				class_map.insert(make_pair(*it, class_vec.size()));
 				bio_index.push_back(class_vec.size());
 				class_vec.push_back(*it);
@@ -203,7 +203,7 @@ size_t Evaluator::append(Parameter& param, vector<string> ref, vector<string> hy
 
 	// for (int i=0; i<ref_d.size(); i++) {
 	// 	std::cout << "hyp:" << hyp[i] << " ref:"  << ref[i] << std::endl;
-	std::cout << "--" <<std::endl;
+	// std::cout << "--" <<std::endl;
 	// }
 	return append(ref_d, hyp_d);
 }
