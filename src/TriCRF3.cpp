@@ -1457,7 +1457,7 @@ bool TriCRF3::test(const std::string& filename, const std::string& outputfile, b
 	test_eval2.initialize();
 
 	/////// for MULTI-DOMAIN SLU evaluation 2008. 4. 30
-	Evaluator evals[m_ParamTopic.sizeStateVec()];
+	Evaluator *evals = new Evaluator[m_ParamTopic.sizeStateVec()];
 	for (size_t i = 0; i < m_ParamTopic.sizeStateVec(); i++) {
 		evals[i].encode(m_ParamSeq[i]);
 		evals[i].initialize();
@@ -1515,18 +1515,22 @@ bool TriCRF3::test(const std::string& filename, const std::string& outputfile, b
 			for (size_t i = 0; it != triseq.seq.end(); ++i, ++it) {	 /// for each node in sequence
 				size_t outcome = triseq.seq[i].label;
 				string outcome_s;
-				/// If there are non-attested labels in dev, test sets, then ...
-				if (m_ParamTopic.sizeStateVec() <= triseq.topic.label || m_ParamSeq[triseq.topic.label].sizeStateVec() <= outcome)
-					outcome_s = m_Param.getState().second[m_default_oid];
-				else
-					outcome_s = m_ParamSeq[triseq.topic.label].getState().second[outcome];
+
+				if (m_ParamTopic.sizeStateVec() <= triseq.topic.label) {
+					std::cout << "ERROR: unknown intent" << triseq.topic.label << std::endl;
+					exit(1);
+				}
+				if (m_Param.sizeStateVec() <= outcome) {
+					std::cout << "ERROR: unknown slot" << outcome << std::endl;
+					exit(1);
+				}
+				outcome_s = m_Param.getState().second[outcome];
 				string y_seq_s = m_ParamSeq[max_z].getState().second[y_seq[i]];
 
 				reference.push_back(outcome_s);
 				hypothesis.push_back(y_seq_s);
 
 				if (outputfile != "") {
-					//outs[triseq.topic.label] << y_seq_s << endl;
 					out << y_seq_s << endl;
 					/*
 					if (confidence) {
@@ -1543,7 +1547,6 @@ bool TriCRF3::test(const std::string& filename, const std::string& outputfile, b
 			}
 			if (outputfile != "")
 				out << endl;
-				//outs[triseq.topic.label] << endl;
 
 			test_eval2.append(m_Param, reference, hypothesis);
 			evals[triseq.topic.label].append(m_ParamSeq[triseq.topic.label], reference, hypothesis);
@@ -1557,7 +1560,7 @@ bool TriCRF3::test(const std::string& filename, const std::string& outputfile, b
 				triseq.topic = packEvent(tokens, &m_ParamTopic, true);	///< wanrning: There are no common element in topic classes and sequence classes.
 			} else {
 				size_t z = (triseq.topic.label < m_ParamTopic.sizeStateVec() ? triseq.topic.label : m_default_oid);
-				StringEvent ev = packStringEvent(tokens,  &m_ParamSeq[z], true);	///< observation features
+				StringEvent ev = packStringEvent(tokens, &m_Param, true);	///< observation features
 				triseq.seq.push_back(ev);	///< append
 			}
 
@@ -1572,19 +1575,12 @@ bool TriCRF3::test(const std::string& filename, const std::string& outputfile, b
 	logger->report("  # of data = \t\t%d\n", count);
 	logger->report("  testing time = \t%.3f\n\n", stop_watch.elapsed());
 	logger->report("[Topic Classification]\n");
-	logger->report("  Acc = \t\t%8.3f\n", test_eval1.getAccuracy());
-	logger->report("  MicroF1 = \t\t%8.3f\n", test_eval1.getMicroF1()[2]);
-	logger->report("  MacroF1 = \t\t%8.3f\n", test_eval1.getMacroF1()[2]);
 	test_eval1.Print(logger);
 
 	logger->report("[Sequential Labeling]\n");
-	logger->report("  Acc = \t\t%8.3f\n", test_eval2.getAccuracy());
-	logger->report("  MicroF1 = \t\t%8.3f\n", test_eval2.getMicroF1()[2]);
-	logger->report("  MacroF1 = \t\t%8.3f\n", test_eval2.getMacroF1()[2]);
 	test_eval2.Print(logger);
 	logger->report("\n-------------PER TOPIC CLASS-------------------------------------------\n");
 	for (size_t i = 0; i < m_ParamTopic.sizeStateVec(); i++) {
-		logger->report("%s MicroF1 = \t\t%8.3f\n", m_ParamTopic.getState().second[i].c_str(), evals[i].getMicroF1()[2]);
 		logger->report("- Domain = %s ----------------------------------------------------\n", m_ParamTopic.getState().second[i].c_str());
 		evals[i].Print(logger);
 	}
