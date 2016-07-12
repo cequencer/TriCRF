@@ -79,6 +79,7 @@ public:
 
 	/// Testing
 	bool test(const std::string& filename, const std::string& outputfile = "", bool confidence = false);
+	bool infer(const std::string& filename, const std::string& outputfile = "", bool confidence = false);
 
 	Parameter& getTopicParam() { return m_ParamTopic; };
 	std::vector<Parameter>& getSeqParam() { return m_ParamSeq; };

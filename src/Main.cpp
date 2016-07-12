@@ -38,6 +38,7 @@ int main(int argc, char** argv) {
 	double l1_prior, l2_prior;
 	enum {MaxEnt = 0, CRF, TriCRF1, TriCRF2, TriCRF3} model_type;
 	bool train_mode = false, testing_mode = false;
+	bool infer_mode = false;
 	bool confidence = false;
 
 	////////////////////////////////////////////////////////////////
@@ -115,6 +116,8 @@ int main(int argc, char** argv) {
 		train_mode = (config.get("mode") == "train" || config.get("mode") == "both" ? true : false);
 	if (config.isValid("mode"))
 		testing_mode = (config.get("mode") == "test" || config.get("mode") == "both" ? true : false);
+	if (config.isValid("mode"))
+		infer_mode = (config.get("mode") == "infer");
 
 	////////////////////////////////////////////////////////////////
 	///	 Data Files
@@ -257,6 +260,36 @@ int main(int argc, char** argv) {
 				model->test(test_file[iter], output_file[iter], confidence);
 			} else
 				model->test(test_file[iter]);
+		}
+	}
+	////////////////////////////////////////////////////////////////
+	///	 Infer mode
+	////////////////////////////////////////////////////////////////
+	if (infer_mode) {
+		assert(test_file.size() == model_file.size());
+		log->report("\n\nINFER\n\n");
+		if (model_file.size() == 0 || test_file.size() == 0) {
+			cerr << "Invalid setting. Please see the configuration\n";
+			return -1;
+		}
+		if (config.isValid("output_file")) {
+			output_file = config.gets("output_file");
+			assert(test_file.size() == output_file.size());
+			if (config.isValid("confidence"))
+				confidence = (config.get("confidence") == "true" ? true : false);
+		}
+
+		for (size_t iter = 0; iter < test_file.size(); iter++) {
+			log->report("\n\nTest File = %s\n\n", test_file[iter].data());
+			model->clear();
+			if (!model->loadModel(model_file[iter])) {
+				cerr << "Model loading error\n";
+				return -1;
+			}
+			if (config.isValid("output_file")) {
+				model->infer(test_file[iter], output_file[iter], confidence);
+			} else
+				model->infer(test_file[iter]);
 		}
 	}
 

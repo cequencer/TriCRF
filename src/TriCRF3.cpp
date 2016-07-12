@@ -1587,6 +1587,135 @@ bool TriCRF3::test(const std::string& filename, const std::string& outputfile, b
 
 }
 
+bool TriCRF3::infer(const std::string& filename, const std::string& outputfile, bool confidence) {
+	/// File stream
+	string line;
+	ifstream f(filename.c_str());
+	if (!f)
+		throw runtime_error("cannot open data file");
+
+	/// output
+	ofstream out;
+	//vector<string> state_vec;
+	if (outputfile != "") {
+		out.open(outputfile.c_str());
+		out.precision(20);
+		//state_vec = m_ParamTopic.getState().second;
+	}
+	/*
+	ofstream out, outs[m_ParamTopic.sizeStateVec()];
+	if (outputfile != "") {
+		string name = outputfile + ".TOPIC";
+		out.open(name.c_str());
+		out.precision(20);
+		for (size_t i = 0; i < m_ParamTopic.sizeStateVec(); i++) {
+			string name = outputfile + "." + m_ParamTopic.getState().second[i];
+			outs[i].open(name.c_str());
+			outs[i].precision(20);
+		}
+	}
+	*/
+
+	/// initializing
+	size_t count = 0;
+	TriStringSequence triseq;
+	logger->report("[Inference begins ...]\n");
+	timer stop_watch;
+
+	size_t seq_count = 0;
+
+	calculateEdge();
+
+	/// reading the text
+	while (getline(f,line)) {
+		vector<string> tokens = tokenize(line, " \t");
+		if (line.empty()) {
+			/// test
+			calculateFactors(triseq);
+  			forward();
+			long double zval = getPartitionZ();
+            long double dummy_prob;
+
+			////////////////////////////////////////////////////////////////////
+			/// pruning
+			////////////////////////////////////////////////////////////////////
+			// for (size_t z = 0; z < m_topic_size; z++) {
+   //      		std::cout << "Proba of z=" << m_prune[z].second << ": " << m_prune[z].first << std::endl;
+			// }
+			long double threshold = m_prune[0].first / m_prune_threshold;
+			vector<pair<long double, size_t> >::iterator pit = m_prune.begin();
+			for (; pit != m_prune.end(); pit++) {
+				if (pit->first < threshold) {
+					m_prune.erase(pit, m_prune.end());
+					break;
+				}
+			}
+
+			size_t max_z;
+			vector<size_t> y_seq = viterbiSearch(max_z, dummy_prob);
+			assert(y_seq.size() == triseq.seq.size());
+			if (confidence)
+				backward();
+
+			if (outputfile != "") {
+				string outcome_s = m_ParamTopic.getState().second[max_z];
+				out << outcome_s;
+				if (confidence) {
+					double prob = 0.0;
+					for (int i=0; i < m_prune.size(); i++) {
+						if (m_prune[i].second == max_z) {
+							prob = m_prune[i].first;
+						}
+					}
+					// double prob = m_Alpha[max_z][ZMAT2(max_z, m_seq_size-1, m_default_oid)] * m_Gamma[max_z] / zval;
+					out << " " << prob;
+				}
+				out << endl;
+			}
+
+			size_t prev_y = m_default_oid;
+			vector<string> reference, hypothesis;
+			StringSequence::iterator it = triseq.seq.begin();
+			for (size_t i = 0; it != triseq.seq.end(); ++i, ++it) {	 /// for each node in sequence
+				string y_seq_s = m_ParamSeq[max_z].getState().second[y_seq[i]];
+
+
+
+				if (outputfile != "") {
+					out << y_seq_s;
+					if (confidence) {
+						// double norm = 0.0;
+						// for (size_t j = 0; j < m_state_size[max_z]; j++)
+						// 	norm += m_R[max_z][ZMAT2(max_z, i, j)] * m_M[max_z][ZMAT2(max_z, prev_y,j)];
+						// double prob = m_R[max_z][ZMAT2(max_z, i, y_seq[i])] * m_M[max_z][ZMAT2(max_z, prev_y,y_seq[i])] / norm;
+						long double y_prob = m_Alpha[max_z][ZMAT2(max_z, i, y_seq[i])] * m_Beta[max_z][ZMAT2(max_z, i, y_seq[i])] * m_Gamma[max_z] / zval;
+						out << " " << y_prob;
+						// prev_y = y_seq[i];
+					}
+					out << endl;
+					//outs[triseq.topic.label] << endl;
+				}
+			}
+			if (outputfile != "")
+				out << endl;
+
+			triseq.seq.clear();
+			seq_count = 0;
+			++count;
+		} else {
+			++seq_count;
+			if (seq_count == 1) { ///< this is a topic
+				triseq.topic = packEvent(tokens, &m_ParamTopic, true);	///< wanrning: There are no common element in topic classes and sequence classes.
+			} else {
+				size_t z = (triseq.topic.label < m_ParamTopic.sizeStateVec() ? triseq.topic.label : m_default_oid);
+				StringEvent ev = packStringEvent(tokens, &m_Param, true);	///< observation features
+				triseq.seq.push_back(ev);	///< append
+			}
+
+		}	///< else
+	}	///< while
+}
+
 }	///< namespace tricrf
 
 

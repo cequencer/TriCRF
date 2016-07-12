@@ -66,6 +66,7 @@ public:
 
 	/// Testing
 	virtual bool test(const std::string& filename, const std::string& outputfile = "", bool confidence = false);
+	virtual bool infer(const std::string& filename, const std::string& outputfile = "", bool confidence = false);
 
 	/// Training
 	virtual void clear();
