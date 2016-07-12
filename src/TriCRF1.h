@@ -26,13 +26,13 @@ protected:
 	Data<TriStringSequence> m_TrainSet;	 ///< Train data
 	Data<TriStringSequence> m_DevSet;	///< Development data (held-out data)
 	std::vector<std::vector<TriSequence> > m_TrainLabelSet;
-	
-	std::vector<std::vector<long double> > m_M;			///< M matrix ; edge transition 
+
+	std::vector<std::vector<long double> > m_M;			///< M matrix ; edge transition
 	std::vector<std::vector<long double> > m_R;			///< R matrix ; node observation
 	std::vector<std::vector<long double> > m_Alpha;	///< Alpha matrix
 	std::vector<std::vector<long double> > m_Beta;		///< Beta matrix
 	std::vector<long double> m_Gamma;			///< Gamma matrix ; topic prior
-	std::vector<long double> m_Z;			///< Z matrix ; topic prior	
+	std::vector<long double> m_Z;			///< Z matrix ; topic prior
 
 	/// Parameters
 	std::vector<Parameter> m_ParamSeq;
@@ -61,24 +61,24 @@ protected:
 public:
 	TriCRF1();
 	TriCRF1(Logger *logger);
-	
+
 	/// Data manipulation
 	void readTrainData(const std::string& filename);
 	void readDevData(const std::string& filename);
 
-	/// Model 
+	/// Model
 	bool loadModel(const std::string& filename);
 	bool saveModel(const std::string& filename);
 
-	/// Training 
+	/// Training
 	void clear();
 	void initializeModel();
-	bool pretrain(size_t max_iter = 100, double sigma = 20, bool L1 = false); 
-	bool train(size_t max_iter = 100, double sigma = 20, bool L1 = false); 
+	bool pretrain(size_t max_iter = 100, double sigma = 20, bool L1 = false);
+	bool train(size_t max_iter = 100, double sigma = 20, bool L1 = false);
 
 	/// Testing
-	bool test(const std::string& filename, const std::string& outputfile = "", bool confidence = false);	
-	
+	bool test(const std::string& filename, const std::string& outputfile = "", bool confidence = false);
+
 	Parameter& getTopicParam() { return m_ParamTopic; };
 	std::vector<Parameter>& getSeqParam() { return m_ParamSeq; };
 
