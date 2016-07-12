@@ -19,10 +19,11 @@
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>
+#include <string.h>
 
 using namespace std;
 
-int main(int argc, void** argv) {
+int main(int argc, char** argv) {
 	////////////////////////////////////////////////////////////////
 	///	 Model
 	////////////////////////////////////////////////////////////////
@@ -49,7 +50,7 @@ int main(int argc, void** argv) {
 	else {
 		cout << MAX_HEADER;
 		cout << "[Usage] max config_file \n\n";
-		exit(1);		
+		exit(1);
 	}
 	tricrf::Configurator config(config_filename);
 
@@ -65,7 +66,7 @@ int main(int argc, void** argv) {
 		log->report("[Configurating]\n");
 		log->report(" Configuration File = %s\n\n", config.getFileName().data());
 	}
-	
+
 	////////////////////////////////////////////////////////////////
 	///	 Selecting the model
 	////////////////////////////////////////////////////////////////
@@ -110,9 +111,9 @@ int main(int argc, void** argv) {
 	////////////////////////////////////////////////////////////////
 	///	 Mode
 	////////////////////////////////////////////////////////////////
-	if (config.isValid("mode")) 
+	if (config.isValid("mode"))
 		train_mode = (config.get("mode") == "train" || config.get("mode") == "both" ? true : false);
-	if (config.isValid("mode")) 
+	if (config.isValid("mode"))
 		testing_mode = (config.get("mode") == "test" || config.get("mode") == "both" ? true : false);
 
 	////////////////////////////////////////////////////////////////
@@ -145,13 +146,13 @@ int main(int argc, void** argv) {
 	////////////////////////////////////////////////////////////////
 	///	 Training mode
 	////////////////////////////////////////////////////////////////
-	if (train_mode) { 
+	if (train_mode) {
 		assert(train_file.size() == model_file.size());
 		if (train_file.size() <= 0) {
 			cerr << "Invalid setting. Please see the configuration\n";
 			return -1;
 		}
-		
+
 		for (size_t iter = 0; iter < train_file.size(); iter++) {
 			log->report("\n\nTraining File = %s\n\n", train_file[iter].data());
 			model->clear();
@@ -163,12 +164,12 @@ int main(int argc, void** argv) {
 			}
 			if (initialize_method == "")
 				model->initializeModel();
-			
+
 			if (config.isValid("iter"))
 				max_iter = atoi(config.get("iter").c_str());
 			else
 				max_iter = 100;
-			
+
 			// initializing the parameter
 			bool init_param = false;
 			if (config.isValid("initialize")) {
@@ -192,9 +193,9 @@ int main(int argc, void** argv) {
 					l1_prior = atof(config.get("l1_prior").c_str());
 				else
 					l1_prior = 0.0;
-				
+
 				if (init_param) {
-					if (!model->pretrain(max_iter, l1_prior, true)) {
+					if (!model->pretrain(init_iter, l1_prior, true)) {
 						cerr << "PL training terminates with error. anyway, we will go.\n\n";
 						//return -1;
 					}
@@ -202,8 +203,8 @@ int main(int argc, void** argv) {
 				if (!model->train(max_iter, l1_prior, true)) {
 					cerr << "training terminates with error\n\n";
 					return -1;
-				}		
-			} else { 
+				}
+			} else {
 				/// LBFGS-L2
 				if (config.isValid("l2_prior"))
 					l2_prior = atof(config.get("l2_prior").c_str());
@@ -211,7 +212,7 @@ int main(int argc, void** argv) {
 					l2_prior = 0.0;
 
 				if (init_param) {
-					if (!model->pretrain(max_iter, l2_prior, true)) {
+					if (!model->pretrain(init_iter, l2_prior, true)) {
 						cerr << "PL training terminates with error. anyway, we will go.\n\n";
 						//return -1;
 					}
@@ -219,7 +220,7 @@ int main(int argc, void** argv) {
 				if (!model->train(max_iter, l2_prior, false)) {
 					cerr << "training terminates with error\n\n";
 					return -1;
-				}		
+				}
 			}
 
 			if (config.isValid("model_file")) {
@@ -228,11 +229,11 @@ int main(int argc, void** argv) {
 
 		} // iteration
 
-	} 
+	}
 	////////////////////////////////////////////////////////////////
 	///	 Testing mode
-	////////////////////////////////////////////////////////////////	
-	if (testing_mode) { 
+	////////////////////////////////////////////////////////////////
+	if (testing_mode) {
 		assert(test_file.size() == model_file.size());
 		if (model_file.size() == 0 || test_file.size() == 0) {
 			cerr << "Invalid setting. Please see the configuration\n";
